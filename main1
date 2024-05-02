@@ -1,0 +1,66 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.cluster.hierarchy import linkage, dendrogram
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
+# Load and preprocess data
+data = pd.read_csv('bps_ic_data.csv')
+
+# Compare PUF score distributions
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+bps_ic_hist, bps_ic_bins = np.histogram(data.loc[data['group'] == 'bps_ic']['puf'], density=True, bins=20)
+bps_ic_kde = stats.gaussian_kde(data.loc[data['group'] == 'bps_ic']['puf'])
+control_hist, control_bins = np.histogram(data.loc[data['group'] == 'control']['puf'], density=True, bins=20)
+control_kde = stats.gaussian_kde(data.loc[data['group'] == 'control']['puf'])
+
+ax1.bar(bps_ic_bins[:-1], bps_ic_hist, width=bps_ic_bins[1]-bps_ic_bins[0], color='blue')
+ax1.plot(bps_ic_bins, bps_ic_kde(bps_ic_bins), color='blue', label='BPS/IC')
+ax2.bar(control_bins[:-1], control_hist, width=control_bins[1]-control_bins[0], color='orange')
+ax2.plot(control_bins, control_kde(control_bins), color='orange', label='Control')
+ax1.set_title('BPS/IC PUF Score Distribution')
+ax2.set_title('Control PUF Score Distribution')
+plt.legend()
+plt.show()
+
+# Hierarchical clustering
+patient_distance = data.loc[:, ['nrs11', 'vulvodynia', 'icsi', 'icpi', 'puf', 'oabqsf', 'oabss', 'pfdi20']].T.corr().abs().values
+Z = linkage(patient_distance, method='ward')
+fig, ax = plt.subplots(figsize=(12, 6))
+dendrogram(Z, ax=ax)
+ax.set_title('Hierarchical Clustering Dendrogram')
+
+# Elbow method for cluster count optimization
+sse = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(data[['nrs11', 'vulvodynia', 'icsi', 'icpi', 'puf', 'oabqsf', 'oabss', 'pfdi20']])
+    sse.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 6))
+plt.plot(range(1, 11), sse)
+plt.title('Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('SSE')
+plt.show()
+
+# K-means clustering
+n_clusters = 3
+kmeans = KMeans(n_clusters=n_clusters)
+labels = kmeans.fit_predict(data[['nrs11', 'vulvodynia', 'icsi', 'icpi', 'puf', 'oabqsf', 'oabss', 'pfdi20']])
+centroids = kmeans.cluster_centers_
+
+# PCA visualization
+pca = PCA(n_components=2)
+principal_components = pca.fit_transform(data[['nrs11', 'vulvodynia', 'icsi', 'icpi', 'puf', 'oabqsf', 'oabss', 'pfdi20']])
+pca_df = pd.DataFrame(data=principal_components, columns=['PCA1', 'PCA2'])
+pca_df['cluster'] = labels
+
+plt.figure(figsize=(8, 6))
+plt.scatter(pca_df['PCA1'], pca_df['PCA2'], c=pca_df['cluster'])
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', s=200, linewidths=3, color='r')
+plt.title('K-means Clustering Centroids')
+plt.xlabel('PCA1')
+plt.ylabel('PCA2')
+plt.show()
