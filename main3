@@ -1,0 +1,35 @@
+import pandas as pd
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Assume 'data' is a DataFrame containing all the BPS/IC parameters
+# including the validated questionnaire data and diary keywords
+
+# Calculate the correlation matrix
+corr_matrix = data.corr()
+
+# Calculate the square root of the inverse of the correlation coefficients
+inv_corr = 1 / np.abs(corr_matrix)
+sqrt_inv_corr = np.sqrt(inv_corr)
+
+# Create the network graph
+G = nx.Graph()
+
+# Add nodes
+for col in data.columns:
+    G.add_node(col, node_color='lightblue', label=col)
+
+# Add edges
+for i in range(len(data.columns)):
+    for j in range(i+1, len(data.columns)):
+        G.add_edge(data.columns[i], data.columns[j], weight=sqrt_inv_corr.iloc[i, j])
+
+# Layout the graph using the spring layout
+pos = nx.spring_layout(G)
+
+# Visualize the network graph
+fig, ax = plt.subplots(figsize=(12, 12))
+nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', font_size=8, ax=ax)
+ax.set_title('Network Graph of BPS/IC Parameters')
+plt.show()
