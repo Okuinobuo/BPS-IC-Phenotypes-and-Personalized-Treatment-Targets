@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from collections import Counter
+
+# Load diary data
+diary_data = pd.read_csv('patient_diaries.csv')
+
+# Text preprocessing
+def preprocess_text(text):
+    # Add your text preprocessing steps here, e.g., tokenization, stopword removal, stemming/lemmatization
+    return text.lower().split()
+
+diary_data['preprocessed_text'] = diary_data['diary_text'].apply(preprocess_text)
+
+# TF-IDF feature extraction
+tfidf = TfidfVectorizer()
+X = tfidf.fit_transform(diary_data['preprocessed_text'])
+
+# Keyword extraction
+vocab = tfidf.get_feature_names_out()
+keyword_counts = dict(zip(vocab, X.sum(axis=0).squeeze()))
+keywords = sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True)
+
+# Filter keywords by occurrence rate
+min_occurrence_rate = 0.05
+keyword_df = pd.DataFrame(keywords)
+keyword_df.columns = ['keyword', 'count']
+keyword_df = keyword_df[keyword_df['count'] >= min_occurrence_rate * len(diary_data)]
+
+print("Top keywords:")
+print(keyword_df)
+
+# Cluster analysis
+n_clusters = 3
+kmeans = KMeans(n_clusters=n_clusters)
+labels = kmeans.fit_predict(X)
+
+# Visualize keyword frequencies by cluster
+fig, ax = plt.subplots(figsize=(12, 6))
+for i in range(n_clusters):
+    cluster_keywords = keyword_df[labels == i]
+    ax.bar(cluster_keywords['keyword'], cluster_keywords['count'], label=f'Cluster {i}')
+ax.set_xlabel('Keyword')
+ax.set_ylabel('Occurrence Rate')
+ax.set_title('Keyword Frequencies by Cluster')
+ax.legend()
+plt.xticks(rotation=90)
+plt.show()
