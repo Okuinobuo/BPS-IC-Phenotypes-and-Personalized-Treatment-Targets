@@ -1,0 +1,22 @@
+import numpy as np
+from scipy.cluster.hierarchy import dendrogram, linkage
+import matplotlib.pyplot as plt
+
+# サンプルデータの生成（実際のデータに置き換えてください）
+data = np.random.rand(100, 5)  # 100人の患者、5つの症状指標
+
+# 階層的クラスタリングの実行
+Z = linkage(data, method='ward')
+
+# デンドログラムの作成
+fig, ax = plt.subplots(figsize=(10, 6))
+dendrogram(Z, leaf_rotation=90., leaf_font_size=8., ax=ax)
+
+# ラベルの設定
+ax.set_xlabel('Sample Index')
+ax.set_ylabel('Distance')
+ax.set_title('Hierarchical Clustering Dendrogram')
+
+# デンドログラムの表示
+plt.tight_layout()
+plt.show()
