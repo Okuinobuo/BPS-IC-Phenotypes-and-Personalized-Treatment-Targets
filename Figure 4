@@ -1,0 +1,78 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Sample diary data (replace with actual data)
+diaries = [
+    "I experienced nocturia and daytime urinary frequency. The bladder pain during storage was severe.",
+    "Dyspareunia and bladder pain were my main symptoms. I also had some urinary frequency.",
+    "Nocturia was a big issue for me. Bladder pain during storage was also present.",
+    "I had no significant symptoms.",
+    # Add more diary entries...
+]
+
+# Cluster labels for each diary (replace with actual labels)
+cluster_labels = [0, 1, 2, 3]  # 0, 1, 2 for patient clusters, 3 for control group
+
+# Keyword extraction function
+def extract_keywords(diary):
+    # Implement keyword extraction logic here
+    # This can be done using NLP libraries like NLTK or spaCy
+    # For simplicity, we'll assume the keywords are already extracted
+    keywords = diary.lower().split()
+    return keywords
+
+# Extract keywords from diaries
+all_keywords = []
+for diary in diaries:
+    keywords = extract_keywords(diary)
+    all_keywords.extend(keywords)
+
+# Count keyword occurrences
+keyword_counts = {}
+for keyword in all_keywords:
+    if keyword in keyword_counts:
+        keyword_counts[keyword] += 1
+    else:
+        keyword_counts[keyword] = 1
+
+# Filter keywords based on 5% usage threshold
+num_diaries = len(diaries)
+filtered_keywords = [keyword for keyword, count in keyword_counts.items() if count / num_diaries >= 0.05]
+
+# Calculate keyword occurrence frequency for each cluster
+cluster_keyword_freq = {}
+for keyword in filtered_keywords:
+    cluster_keyword_freq[keyword] = [0] * 4  # Initialize frequency for each cluster and control group
+
+for keyword in filtered_keywords:
+    for i, diary in enumerate(diaries):
+        if keyword in diary.lower():
+            cluster_keyword_freq[keyword][cluster_labels[i]] += 1
+
+# Normalize keyword occurrence frequency within each cluster
+for keyword in filtered_keywords:
+    cluster_sizes = [cluster_labels.count(i) for i in range(4)]
+    cluster_keyword_freq[keyword] = [freq / size if size > 0 else 0 for freq, size in zip(cluster_keyword_freq[keyword], cluster_sizes)]
+
+# Visualization
+fig, ax = plt.subplots(figsize=(8, 6))
+
+keywords = list(cluster_keyword_freq.keys())
+num_keywords = len(keywords)
+x = np.arange(num_keywords)
+bar_width = 0.2
+
+for i in range(4):
+    color = ['blue', 'orange', 'green', 'red'][i]
+    label = ['Cluster 0', 'Cluster 1', 'Cluster 2', 'Control'][i]
+    frequencies = [cluster_keyword_freq[keyword][i] for keyword in keywords]
+    ax.bar(x + i * bar_width, frequencies, width=bar_width, color=color, label=label)
+
+ax.set_xticks(x + bar_width * 1.5)
+ax.set_xticklabels(keywords, rotation=45, ha='right')
+ax.set_ylabel('Occurrence Frequency')
+ax.set_title('Symptom Occurrence Frequency by Cluster')
+ax.legend()
+
+plt.tight_layout()
+plt.show()
