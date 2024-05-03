@@ -1,0 +1,72 @@
+import networkx as nx
+import itertools
+
+def tsp_shortest_path(graph, start_node, end_node, required_nodes=None):
+    nodes = list(graph.nodes())
+    
+    if required_nodes is None:
+        required_nodes = []
+    
+    min_path = None
+    min_distance = float('inf')
+
+    for path in itertools.permutations(nodes):
+        if path[0] == start_node and path[-1] == end_node and all(node in path for node in required_nodes):
+            distance = 0
+            prev_node = None
+            for node in path:
+                if prev_node is not None:
+                    distance += graph[prev_node][node]['weight']
+                prev_node = node
+            
+            if distance < min_distance:
+                min_path = path
+                min_distance = distance
+    
+    return min_path, min_distance
+
+# Create the network graph
+G = nx.Graph()
+
+# Add nodes and edges based on the network diagram
+G.add_edge('b', 'ad', weight=1.084)
+G.add_edge('ad', 'ab', weight=1.0)
+G.add_edge('ab', 'ai', weight=1.0)
+G.add_edge('ai', 'f', weight=1.0)
+G.add_edge('f', 'b', weight=1.0)
+G.add_edge('ai', 'C1', weight=1.0)
+G.add_edge('C1', 'f', weight=1.0)
+G.add_edge('f', 'as', weight=1.0)
+G.add_edge('as', 'r', weight=1.0)
+G.add_edge('r', 'w', weight=1.0)
+G.add_edge('w', 'f', weight=1.0)
+G.add_edge('b', 'C2', weight=1.0)
+G.add_edge('C2', 'w', weight=1.0)
+
+# Patient A
+start_node_A = 'b'
+end_node_A = 'f'
+required_nodes_A = ['ad', 'ab', 'ai']
+
+shortest_path_A, shortest_distance_A = tsp_shortest_path(G, start_node_A, end_node_A, required_nodes_A)
+print(f"Patient A - Shortest Path: {shortest_path_A}")
+print(f"Patient A - Shortest Distance: {shortest_distance_A}")
+
+required_nodes_A_C0_C2 = ['ad', 'ab', 'ai', 'C0', 'C2']
+shortest_path_A_C0_C2, shortest_distance_A_C0_C2 = tsp_shortest_path(G, start_node_A, end_node_A, required_nodes_A_C0_C2)
+print(f"Patient A (including C0 or C2) - Shortest Path: {shortest_path_A_C0_C2}")
+print(f"Patient A (including C0 or C2) - Shortest Distance: {shortest_distance_A_C0_C2}")
+
+# Patient B
+start_node_B = 'f'
+end_node_B = 'f'
+required_nodes_B = ['b', 'as', 'r', 'w']
+
+shortest_path_B, shortest_distance_B = tsp_shortest_path(G, start_node_B, end_node_B, required_nodes_B)
+print(f"Patient B - Shortest Path: {shortest_path_B}")
+print(f"Patient B - Shortest Distance: {shortest_distance_B}")
+
+required_nodes_B_C2 = ['b', 'as', 'r', 'w', 'C2']
+shortest_path_B_C2, shortest_distance_B_C2 = tsp_shortest_path(G, start_node_B, end_node_B, required_nodes_B_C2)
+print(f"Patient B (including C2) - Shortest Path: {shortest_path_B_C2}")
+print(f"Patient B (including C2) - Shortest Distance: {shortest_distance_B_C2}")
