@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+
+# Generate sample data for control and BPS/IC groups
+control_scores = np.random.normal(5, 3, 100)
+bps_ic_scores = np.random.normal(20, 5, 100)
+
+# Create figure and axis
+fig, ax = plt.subplots(figsize=(8, 6))
+
+# Plot histograms
+bins = np.linspace(0, 35, 20)
+ax.hist(control_scores, bins, density=True, alpha=0.5, color='orange', label='Control')
+ax.hist(bps_ic_scores, bins, density=True, alpha=0.5, color='blue', label='BPS/IC')
+
+# Calculate and plot KDE curves
+control_kde = gaussian_kde(control_scores)
+bps_ic_kde = gaussian_kde(bps_ic_scores)
+x = np.linspace(0, 35, 200)
+ax.plot(x, control_kde(x), color='orange', linewidth=2)
+ax.plot(x, bps_ic_kde(x), color='blue', linewidth=2)
+
+# Set labels and title
+ax.set_xlabel('PUF Score')
+ax.set_ylabel('Density')
+ax.set_title('Distribution of Pelvic Pain and Urgency/Frequency Scores')
+ax.legend()
+
+# Display the plot
+plt.tight_layout()
+plt.show()
