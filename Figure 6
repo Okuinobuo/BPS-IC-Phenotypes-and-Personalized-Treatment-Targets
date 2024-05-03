@@ -1,0 +1,29 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Create an empty graph
+G = nx.Graph()
+
+# Add nodes to the graph
+nodes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai', 'aj', 'ak', 'al', 'am', 'an', 'ao', 'ap', 'aq', 'ar', 'as', 'at', 'au', 'av', 'aw', 'C0', 'C1', 'C2', 'Cx']
+G.add_nodes_from(nodes)
+
+# Add edges to the graph based on the square root of the inverse of the correlation coefficients
+edges = [
+    ('a', 'b', 1.0), ('a', 'c', 1.5), ('b', 'd', 2.0), ('c', 'd', 1.2),
+    # Add more edges with their corresponding weights (square root of the inverse of the correlation coefficients)
+]
+G.add_weighted_edges_from(edges)
+
+# Set node positions using the spring layout algorithm
+pos = nx.spring_layout(G)
+
+# Draw the graph
+nx.draw_networkx_nodes(G, pos, node_color='turquoise', node_size=500)
+nx.draw_networkx_edges(G, pos, edge_color='gray')
+nx.draw_networkx_labels(G, pos, font_color='black', font_size=12)
+
+# Show the graph
+plt.axis('off')
+plt.title('Network Graph')
+plt.show()
