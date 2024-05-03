@@ -1,0 +1,39 @@
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate sample data (replace with your actual data)
+data = np.random.rand(100, 5)  # 100 patients, 5 symptom indicators
+
+# Perform K-means clustering with 3 clusters
+kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=300, n_init=10, random_state=0)
+kmeans.fit(data)
+labels = kmeans.labels_
+
+# Perform PCA for dimensionality reduction
+pca = PCA(n_components=2)
+principal_components = pca.fit_transform(data)
+
+# Create the centroid plot
+fig, ax = plt.subplots(figsize=(8, 6))
+
+# Plot the data points for each cluster
+colors = ['red', 'blue', 'green']
+groups = ['BPS Group', 'MFP Group', 'NUPP Group']
+for i, color, group in zip(range(3), colors, groups):
+    cluster_data = principal_components[labels == i]
+    ax.scatter(cluster_data[:, 0], cluster_data[:, 1], c=color, marker='x', label=group)
+
+# Plot the cluster centroids
+centroids = pca.transform(kmeans.cluster_centers_)
+ax.scatter(centroids[:, 0], centroids[:, 1], c='yellow', marker='x', s=200, label='Centroids')
+
+# Set the axis labels and legend
+ax.set_xlabel('PCA 1')
+ax.set_ylabel('PCA 2')
+ax.set_title('Centroid Plot for 3-cluster Solution')
+ax.legend()
+
+plt.tight_layout()
+plt.show()
