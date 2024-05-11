@@ -1,0 +1,92 @@
+import networkx as nx
+import heapq
+
+def heuristic(node1, node2):
+    # Heuristic function: Using the straight-line distance between nodes
+    return abs(int(node1[1:]) - int(node2[1:]))
+
+def a_star_shortest_path(graph, start_node, end_node, required_nodes=None):
+    if required_nodes is None:
+        required_nodes = []
+
+    visited = set()
+    heap = [(0, 0, start_node, [start_node])]
+
+    while heap:
+        (f, g, current_node, path) = heapq.heappop(heap)
+
+        if current_node == end_node and all(node in path for node in required_nodes):
+            return path, g
+
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        for neighbor in graph.neighbors(current_node):
+            if neighbor not in visited:
+                g_tentative = g + graph[current_node][neighbor]['weight']
+                f_tentative = g_tentative + heuristic(neighbor, end_node)
+                heapq.heappush(heap, (f_tentative, g_tentative, neighbor, path + [neighbor]))
+
+    return None, None
+
+# Create the network graph
+G = nx.Graph()
+
+# Add nodes and edges based on the network diagram
+G.add_edge('b', 'ad', weight=1.084)
+G.add_edge('ad', 'ab', weight=1.0)
+G.add_edge('ab', 'ai', weight=1.0)
+G.add_edge('ai', 'f', weight=1.0)
+G.add_edge('f', 'b', weight=1.0)
+G.add_edge('ai', 'C1', weight=1.0)
+G.add_edge('C1', 'f', weight=1.0)
+G.add_edge('f', 'as', weight=1.0)
+G.add_edge('as', 'r', weight=1.0)
+G.add_edge('r', 'w', weight=1.0)
+G.add_edge('w', 'f', weight=1.0)
+G.add_edge('b', 'C2', weight=1.0)
+G.add_edge('C2', 'w', weight=1.0)
+
+# Patient A
+start_node_A = 'b'
+end_node_A = 'b'
+required_nodes_A = ['ad', 'ab', 'ai', 'f']
+print("Patient A:")
+path_A, cost_A = a_star_shortest_path(G, start_node_A, end_node_A, required_nodes_A)
+if path_A is not None:
+    print(f"Shortest Path: {' -> '.join(path_A)}")
+    print(f"Shortest Distance: {cost_A:.3f}")
+else:
+    print(f"No path found from {start_node_A} to {end_node_A} that includes all required nodes.")
+
+required_nodes_A_C1_C2 = ['ad', 'ab', 'ai', 'C1', 'f']
+print("Patient A (including C1 or C2):")
+path_A_C1_C2, cost_A_C1_C2 = a_star_shortest_path(G, start_node_A, end_node_A, required_nodes_A_C1_C2)
+if path_A_C1_C2 is not None:
+    print(f"Shortest Path: {' -> '.join(path_A_C1_C2)}")
+    print(f"Shortest Distance: {cost_A_C1_C2:.3f}")
+else:
+    print(f"No path found from {start_node_A} to {end_node_A} that includes all required nodes.")
+
+# Patient B
+start_node_B = 'f'
+end_node_B = 'f'
+required_nodes_B = ['b', 'as', 'r', 'w']
+print("Patient B:")
+path_B, cost_B = a_star_shortest_path(G, start_node_B, end_node_B, required_nodes_B)
+if path_B is not None:
+    print(f"Shortest Path: {' -> '.join(path_B)}")
+    print(f"Shortest Distance: {cost_B:.3f}")
+else:
+    print(f"No path found from {start_node_B} to {end_node_B} that includes all required nodes.")
+
+required_nodes_B_C2 = ['b', 'as', 'r', 'w', 'C2']
+print("Patient B (including C2):")
+path_B_C2, cost_B_C2 = a_star_shortest_path(G, start_node_B, end_node_B, required_nodes_B_C2)
+if path_B_C2 is not None:
+    print(f"Shortest Path: {' -> '.join(path_B_C2)}")
+    print(f"Shortest Distance: {cost_B_C2:.3f}")
+else:
+    print(f"No path found from {start_node_B} to {end_node_B} that includes all required nodes.")
